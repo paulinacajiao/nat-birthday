@@ -781,7 +781,8 @@ function renderLessons() {
 
 function shareMessage() {
   const paceTxt = { 1: "every day", 2: "every 2 days", 3: "every 3 days", 7: "every week" }[plan.pace];
-  return `I'm starting my Board Lab course on ${nice(parseDate(plan.start))}, with a new lesson ${paceTxt}. Please check my lessons so they're ready on time. Thank you for the best present 🏄`;
+  const schedule = LESSONS.map((l, i) => i === 0 ? null : `${i}. ${l.title}: ${nice(unlockDate(i))}${isApproved(i) ? "" : " (needs your OK)"}`).filter(Boolean).join("\n");
+  return `I'm starting my Board Lab course on ${nice(parseDate(plan.start))}, with a new lesson ${paceTxt}. Here's when each lesson unlocks:\n${schedule}\nPlease check the ones marked so they're ready on time. Thank you for the best present 🏄`;
 }
 
 function renderStatus() {
