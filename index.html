@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Board Lab · a birthday course in vibecoding</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏄</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Familjen+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ============ Colors ============ */
+  :root {
+    --sky: #E7EEF0;
+    --paper: #F9FBFB;
+    --ink: #10324A;
+    --muted: #4E6676;
+    --coral: #E4503E;
+    --coral-ink: #FFFFFF;
+    --resin: #F2C14E;
+    --line: #C5D3D8;
+    --board-stroke: #10324A;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --sky: #0D1F2D;
+      --paper: #132B3C;
+      --ink: #E4EDF0;
+      --muted: #9DB3BF;
+      --coral: #FF6F5C;
+      --coral-ink: #10202B;
+      --resin: #E9B83F;
+      --line: #24465C;
+      --board-stroke: #0D1F2D;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --sky: #0D1F2D;
+    --paper: #132B3C;
+    --ink: #E4EDF0;
+    --muted: #9DB3BF;
+    --coral: #FF6F5C;
+    --coral-ink: #10202B;
+    --resin: #E9B83F;
+    --line: #24465C;
+    --board-stroke: #0D1F2D;
+    color-scheme: dark;
+  }
+
+  /* ============ Base ============ */
+  :root {
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  *, *::before, *::after { box-sizing: inherit; }
+  body {
+    margin: 0;
+    background: var(--sky);
+    color: var(--ink);
+    font-family: "Familjen Grotesk", "Helvetica Neue", Arial, system-ui, sans-serif;
+    font-size: 1.0625rem;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  img, svg { max-width: 100%; }
+  a { color: var(--coral); text-underline-offset: 2px; }
+  :focus-visible { outline: 3px solid var(--coral); outline-offset: 3px; border-radius: 4px; }
+  .wrap { width: min(1080px, 100% - 2.5rem); margin-inline: auto; }
+  .prose { max-width: 66ch; }
+  h1, h2, h3 { line-height: 1.1; margin: 0; font-weight: 700; letter-spacing: -0.02em; }
+  p { margin: 0 0 0.9em; }
+
+  /* ============ Hero ============ */
+  .hero { padding: clamp(2.5rem, 7vw, 5rem) 0 1rem; }
+  .hero h1 {
+    font-size: clamp(2.6rem, 8vw, 5.5rem);
+    letter-spacing: -0.04em;
+    line-height: 0.95;
+    max-width: 12ch;
+  }
+  .note {
+    font-family: "Caveat", "Segoe Print", "Bradley Hand", cursive;
+    font-size: clamp(1.45rem, 3.4vw, 1.9rem);
+    line-height: 1.25;
+    color: var(--muted);
+    margin-top: 1.2rem;
+    max-width: 34ch;
+  }
+
+  /* ============ Board stage (the memorable bit) ============ */
+  .stage {
+    margin-top: 2rem;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: clamp(1rem, 3vw, 2rem);
+  }
+  .board-svg { display: block; width: 100%; height: auto; max-height: 320px; }
+  .board-fill { fill: var(--resin); stroke: var(--board-stroke); stroke-width: 2.5; stroke-linejoin: round; }
+  .stringer { stroke: var(--board-stroke); stroke-width: 1.4; opacity: 0.55; }
+  .sig { font-family: "Caveat", cursive; font-size: 34px; fill: var(--board-stroke); font-weight: 700; }
+  .fin { fill: var(--board-stroke); opacity: 0.35; }
+  .dim { fill: var(--muted); font-size: 18px; font-family: "Familjen Grotesk", Arial, sans-serif; }
+
+  .readout {
+    display: flex; flex-wrap: wrap; gap: 0.5rem 2rem;
+    margin: 0.5rem 0 1.25rem;
+    font-size: 1.05rem;
+  }
+  .readout strong { font-size: 1.5rem; display: block; line-height: 1.1; }
+  .readout span { color: var(--muted); font-size: 0.9rem; }
+
+  .controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 1rem 1.5rem;
+  }
+  .control.wide { grid-column: 1 / -1; }
+  .control label { display: flex; justify-content: space-between; font-weight: 600; font-size: 0.95rem; margin-bottom: 0.3rem; }
+  .control output { color: var(--muted); font-weight: 500; }
+  input[type="range"] { width: 100%; accent-color: var(--coral); }
+  .seg { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+  .seg button {
+    font: inherit; font-size: 0.9rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .seg button[aria-pressed="true"] { background: var(--ink); color: var(--sky); border-color: var(--ink); }
+  .stage-caption { margin-top: 1.25rem; color: var(--muted); font-size: 0.95rem; max-width: 70ch; }
+
+  /* ============ Sections ============ */
+  section { padding: clamp(2.5rem, 6vw, 4rem) 0 0; }
+  section > .wrap > h2 { font-size: clamp(1.8rem, 4.5vw, 2.6rem); margin-bottom: 0.8rem; }
+  .lede { color: var(--muted); font-size: 1.1rem; }
+
+  /* Date picker */
+  .picker {
+    display: grid; gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    align-items: end;
+    margin-top: 1.25rem;
+    max-width: 760px;
+  }
+  .field label { display: block; font-weight: 600; margin-bottom: 0.35rem; }
+  .field input, .field select {
+    width: 100%;
+    font: inherit;
+    padding: 0.65rem 0.8rem;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    color: var(--ink);
+  }
+  .btn {
+    font: inherit; font-weight: 600;
+    padding: 0.7rem 1.2rem;
+    border-radius: 999px;
+    border: 0;
+    background: var(--coral);
+    color: var(--coral-ink);
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+  .status { margin-top: 1rem; max-width: 66ch; }
+  .status .actions { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 0.75rem; }
+
+  /* Lessons: a real sequence, so numbered */
+  .lessons { list-style: none; padding: 0; margin: 1.5rem 0 0; counter-reset: lesson -1; }
+  .lesson {
+    counter-increment: lesson;
+    display: grid;
+    grid-template-columns: 3.2rem 1fr;
+    gap: 0 1rem;
+    padding: 1.5rem 0;
+    border-top: 1px solid var(--line);
+  }
+  .lesson::before {
+    content: counter(lesson);
+    font-size: 2.4rem; font-weight: 700; line-height: 1;
+    color: var(--coral);
+    letter-spacing: -0.04em;
+  }
+  .lesson.locked::before { color: var(--line); }
+  .lesson h3 { font-size: 1.45rem; }
+  .lesson .meta { color: var(--muted); font-size: 0.95rem; margin: 0.25rem 0 0; }
+  .lesson details { margin-top: 0.8rem; }
+  .lesson summary {
+    cursor: pointer; font-weight: 600; color: var(--coral);
+    list-style: none; display: inline-block;
+  }
+  .lesson summary::-webkit-details-marker { display: none; }
+  .lesson details[open] summary { margin-bottom: 0.8rem; }
+  .lesson-body { max-width: 68ch; }
+  .lesson-body h4 { margin: 1.2rem 0 0.4rem; font-size: 1.05rem; }
+  .lesson-body ul { padding-left: 1.2rem; margin: 0 0 0.9em; }
+  .lesson-body li { margin-bottom: 0.35rem; }
+  .locked-msg { color: var(--muted); margin-top: 0.6rem; }
+
+  .prompt {
+    position: relative;
+    background: var(--sky);
+    border: 1px dashed var(--line);
+    border-radius: 12px;
+    padding: 1rem 1rem 1rem;
+    margin: 0.6rem 0 1rem;
+  }
+  .prompt pre {
+    margin: 0;
+    white-space: pre-wrap;
+    font-family: "Familjen Grotesk", Arial, sans-serif;
+    font-size: 0.97rem;
+    overflow-x: auto;
+  }
+  .prompt .copy { margin-top: 0.8rem; padding: 0.4rem 0.9rem; font-size: 0.9rem; }
+
+  footer { padding: 4rem 0 3rem; }
+  footer .note { margin-top: 0; }
+
+  @media (max-width: 560px) {
+    .lesson { grid-template-columns: 2.2rem 1fr; }
+    .lesson::before { font-size: 1.8rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <h1 id="greeting">Happy birthday</h1>
+    <p class="note" id="note"></p>
+  </div>
+
+  <div class="wrap">
+    <div class="stage" aria-labelledby="stage-title">
+      <h2 id="stage-title" class="sr-only" style="position:absolute;left:-9999px">Shape a board</h2>
+      <svg class="board-svg" id="board" viewBox="0 30 1000 240" role="img" aria-label="Top view of a surfboard outline that changes with the controls below">
+        <path id="outline" class="board-fill" d=""></path>
+        <line id="stringer" class="stringer" x1="0" y1="150" x2="0" y2="150"></line>
+        <g id="fins"></g>
+        <text id="sig" class="sig" x="0" y="140" text-anchor="middle"></text>
+        <text id="lenLabel" class="dim" x="500" y="258" text-anchor="middle"></text>
+      </svg>
+
+      <div class="readout" aria-live="polite">
+        <div><strong id="rDims"></strong><span>length × width × thickness</span></div>
+        <div><strong id="rVol"></strong><span>rough volume</span></div>
+        <div><strong id="rType"></strong><span>what a shaper might call it</span></div>
+      </div>
+
+      <div class="controls">
+        <div class="control">
+          <label for="len">Length <output id="lenOut"></output></label>
+          <input id="len" type="range" min="60" max="120" step="1" value="72">
+        </div>
+        <div class="control">
+          <label for="wid">Width <output id="widOut"></output></label>
+          <input id="wid" type="range" min="17.5" max="23.5" step="0.25" value="20">
+        </div>
+        <div class="control">
+          <label for="thk">Thickness <output id="thkOut"></output></label>
+          <input id="thk" type="range" min="2" max="3.5" step="0.0625" value="2.5">
+        </div>
+        <div class="control">
+          <label id="noseLbl">Nose</label>
+          <div class="seg" role="group" aria-labelledby="noseLbl" data-key="nose">
+            <button type="button" data-v="pointed" aria-pressed="true">Pointed</button>
+            <button type="button" data-v="round" aria-pressed="false">Round</button>
+          </div>
+        </div>
+        <div class="control wide">
+          <label id="tailLbl">Tail</label>
+          <div class="seg" role="group" aria-labelledby="tailLbl" data-key="tail">
+            <button type="button" data-v="squash" aria-pressed="true">Squash</button>
+            <button type="button" data-v="round" aria-pressed="false">Round</button>
+            <button type="button" data-v="pin" aria-pressed="false">Pin</button>
+            <button type="button" data-v="swallow" aria-pressed="false">Swallow</button>
+          </div>
+        </div>
+      </div>
+
+      <p class="stage-caption">Play with it. This little shaper was built by describing it in plain English to an AI. By the end of this course you'll build a better one yourself: with rocker, volume for your weight, side-by-side comparisons, and maybe a full-size printable template.</p>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section id="start" aria-labelledby="start-title">
+    <div class="wrap">
+      <h2 id="start-title">Pick your start date</h2>
+      <p class="lede prose">This is a five-lesson course in building your own interactive tools with AI, no coding background needed. Choose when you want it to begin and how often a new lesson should unlock. Lesson 0 is open right now.</p>
+
+      <div class="picker">
+        <div class="field">
+          <label for="startDate">Start on</label>
+          <input id="startDate" type="date">
+        </div>
+        <div class="field">
+          <label for="pace">New lesson every</label>
+          <select id="pace">
+            <option value="1">Day</option>
+            <option value="2" selected>2 days</option>
+            <option value="3">3 days</option>
+            <option value="7">Week</option>
+          </select>
+        </div>
+        <div><button class="btn" id="saveBtn" type="button">Start my course</button></div>
+      </div>
+
+      <div class="status" id="status" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section id="lessons" aria-labelledby="lessons-title">
+    <div class="wrap">
+      <h2 id="lessons-title">The lessons</h2>
+      <ol class="lessons" id="lessonList"></ol>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p class="note" id="signoff"></p>
+  </div>
+</footer>
+
+<script>
+/* =====================================================================
+   EDIT THESE FEW LINES BEFORE YOU SHARE THE PAGE
+   ===================================================================== */
+const CONFIG = {
+  friendName: "Nat",             // her name, shown in the greeting and on the board
+  fromName: "Paulina",           // your name
+  note: "You've spent years engineering things that keep people alive. Now let's build something purely for fun: tools for the thing you love most in the water.",
+  phone: "",                     // your number, e.g. "+14155550123" (lets her text you her start date)
+  email: ""                      // or your email, used if phone is empty
+};
+/* Tip: add ?preview=all to the URL to unlock every lesson for proofreading. */
+/* ===================================================================== */
+
+const $ = (id) => document.getElementById(id);
+
+/* ---------- Greeting ---------- */
+$("greeting").textContent = `Happy birthday, ${CONFIG.friendName}.`;
+$("note").textContent = CONFIG.note;
+$("signoff").textContent = `Go build something rad. Love, ${CONFIG.fromName}`;
+
+/* ---------- Board shaper ---------- */
+const state = { L: 72, W: 20, T: 2.5, nose: "pointed", tail: "squash" };
+const PX = 7.5;           // px per inch
+const CY = 140;           // centerline
+
+function ftIn(inches) {
+  const ft = Math.floor(inches / 12);
+  const i = Math.round(inches - ft * 12);
+  return i === 12 ? `${ft + 1}'0"` : `${ft}'${i}"`;
+}
+function frac(x) {
+  const whole = Math.floor(x);
+  const sixteenths = Math.round((x - whole) * 16);
+  if (sixteenths === 0) return `${whole}"`;
+  if (sixteenths === 16) return `${whole + 1}"`;
+  let n = sixteenths, d = 16;
+  while (n % 2 === 0) { n /= 2; d /= 2; }
+  return `${whole} ${n}/${d}"`;
+}
+
+function buildPath() {
+  const Lp = state.L * PX;
+  const x0 = (1000 - Lp) / 2;
+  const xe = x0 + Lp;
+  const hw = (state.W / 2) * PX;
+  const xw = x0 + Lp * 0.5;
+  const tailFactor = { squash: 0.55, round: 0.48, pin: 0.28, swallow: 0.62 }[state.tail];
+  const th = hw * tailFactor;
+
+  let x1;
+  if (state.tail === "round") x1 = xe - th * 0.9;
+  else if (state.tail === "pin") x1 = xe - Lp * 0.14;
+  else x1 = xe - 6;
+
+  const c1 = state.nose === "round"
+    ? [x0 + 2, CY - hw * 0.75]
+    : [x0 + Lp * 0.1, CY - hw * 0.62];
+  const c2 = [xw - Lp * (state.nose === "round" ? 0.3 : 0.22), CY - hw];
+  const c3 = [xw + Lp * 0.2, CY - hw];
+  const c4 = [x1 - Lp * 0.16, CY - (th + (hw - th) * (0.42 + (1 - tailFactor) * 0.45))];
+  const f = (p) => `${p[0].toFixed(1)},${p[1].toFixed(1)}`;
+  const m = (p) => [p[0], 2 * CY - p[1]];
+
+  // control point continuing the rail's direction past the tail corner, for a smooth tail
+  const t1 = (k) => {
+    const dx = x1 - c4[0], dy = (CY - th) - c4[1];
+    const a = ((xe - x1) * k) / dx;
+    return [x1 + dx * a, CY - th + dy * a];
+  };
+
+  let d = `M ${x0.toFixed(1)},${CY} `;
+  d += `C ${f(c1)} ${f(c2)} ${f([xw, CY - hw])} `;
+  d += `C ${f(c3)} ${f(c4)} ${f([x1, CY - th])} `;
+
+  if (state.tail === "squash") {
+    d += `Q ${f([xe, CY - th])} ${f([xe, CY - th * 0.6])} L ${f([xe, CY + th * 0.6])} Q ${f([xe, CY + th])} ${f([x1, CY + th])} `;
+  } else if (state.tail === "round") {
+    d += `C ${f(t1(0.55))} ${f([xe, CY - th * 0.5])} ${f([xe, CY])} `;
+    d += `C ${f([xe, CY + th * 0.5])} ${f(m(t1(0.55)))} ${f([x1, CY + th])} `;
+  } else if (state.tail === "pin") {
+    d += `C ${f(t1(0.6))} ${f([xe - Lp * 0.01, CY - th * 0.12])} ${f([xe, CY])} `;
+    d += `C ${f([xe - Lp * 0.01, CY + th * 0.12])} ${f(m(t1(0.6)))} ${f([x1, CY + th])} `;
+  } else {
+    d += `L ${f([xe, CY - th * 0.95])} L ${f([xe - th * 0.95, CY])} L ${f([xe, CY + th * 0.95])} L ${f([x1, CY + th])} `;
+  }
+
+  d += `C ${f(m(c4))} ${f(m(c3))} ${f([xw, CY + hw])} `;
+  d += `C ${f(m(c2))} ${f(m(c1))} ${f([x0, CY])} Z`;
+
+  return { d, x0, xe, Lp, hw, th };
+}
+
+function boardType() {
+  const { L, tail } = state;
+  if (L >= 108) return "Longboard";
+  if (L >= 96) return "Mini-mal";
+  if (L >= 80) return "Mid-length";
+  if (tail === "swallow" && L <= 70) return "Fish";
+  if (tail === "pin") return "Step-up";
+  return "Shortboard";
+}
+
+function render() {
+  const g = buildPath();
+  $("outline").setAttribute("d", g.d);
+  // frame the board snugly so it stays big on phones
+  const vw = Math.max(g.Lp + 70, 560);
+  $("board").setAttribute("viewBox", `${(500 - vw / 2).toFixed(1)} 30 ${vw.toFixed(1)} 240`);
+  const s = $("stringer");
+  s.setAttribute("x1", g.x0 + 4); s.setAttribute("x2", g.xe - (state.tail === "swallow" ? g.th : 4));
+  s.setAttribute("y1", CY); s.setAttribute("y2", CY);
+
+  const sig = $("sig");
+  sig.textContent = CONFIG.friendName;
+  sig.setAttribute("x", g.x0 + g.Lp * 0.42);
+  sig.setAttribute("y", CY - 10);
+
+  // thruster near the tail (twin fin on a swallow)
+  const fx = g.xe - g.Lp * 0.14;
+  const fins = $("fins");
+  fins.innerHTML = "";
+  const fy = Math.max(g.th * 0.75, g.hw * 0.32);
+  const finPos = [[fx, CY - fy], [fx, CY + fy]];
+  if (state.tail !== "swallow") finPos.push([g.xe - g.Lp * 0.06, CY]); // fish = twin fin
+  finPos.forEach(([x, y]) => {
+    const r = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    r.setAttribute("x", x - 14); r.setAttribute("y", y - 2.5);
+    r.setAttribute("width", 28); r.setAttribute("height", 5); r.setAttribute("rx", 2.5);
+    r.setAttribute("class", "fin");
+    fins.appendChild(r);
+  });
+
+  $("lenLabel").textContent = ftIn(state.L);
+  $("lenOut").textContent = ftIn(state.L);
+  $("widOut").textContent = frac(state.W);
+  $("thkOut").textContent = frac(state.T);
+
+  // Rough volume: bounding box × a typical shape factor (~0.54)
+  const litres = state.L * state.W * state.T * 0.016387 * 0.54;
+  $("rDims").textContent = `${ftIn(state.L)} × ${frac(state.W)} × ${frac(state.T)}`;
+  $("rVol").textContent = `≈ ${litres.toFixed(1)} L`;
+  $("rType").textContent = boardType();
+}
+
+$("len").addEventListener("input", (e) => { state.L = +e.target.value; render(); });
+$("wid").addEventListener("input", (e) => { state.W = +e.target.value; render(); });
+$("thk").addEventListener("input", (e) => { state.T = +e.target.value; render(); });
+document.querySelectorAll(".seg").forEach((grp) => {
+  grp.addEventListener("click", (e) => {
+    const b = e.target.closest("button"); if (!b) return;
+    grp.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
+    state[grp.dataset.key] = b.dataset.v;
+    render();
+  });
+});
+render();
+
+/* ---------- Lessons ---------- */
+const P = (text) => `<div class="prompt"><pre>${text.replace(/&/g,"&amp;").replace(/</g,"&lt;")}</pre><button type="button" class="btn ghost copy">Copy prompt</button></div>`;
+
+const LESSONS = [
+  {
+    title: "What vibecoding actually is",
+    time: "10 minutes",
+    body: `
+      <p>Vibecoding means building software by describing what you want in plain language. An AI writes the code, you look at the result, and you steer: "make the tail narrower", "add a volume readout", "that broke, here's what I see". You never have to type code yourself unless you want to.</p>
+      <p>Think of it as running a design review with a very fast, very patient junior engineer. You own the requirements and you verify the output. It does the typing. Your background is a real advantage here: writing clear specs, testing against them and iterating is exactly the skill that matters.</p>
+      <h4>Three habits that make it work</h4>
+      <ul>
+        <li><strong>Be specific.</strong> "A surfboard app" gets you something generic. "A top-view outline with sliders for length from 5'0" to 10'0"" gets you what you pictured.</li>
+        <li><strong>Change one thing at a time.</strong> Small steps are easy to check and easy to undo.</li>
+        <li><strong>Say what you see.</strong> When something's off, describe what you expected and what actually happened, like a bug report.</li>
+      </ul>
+      <h4>Before the next lesson</h4>
+      <p>Play with the board at the top of this page and notice what you'd want it to do that it doesn't. Write those wishes down. That list is your first product spec.</p>`
+  },
+  {
+    title: "Your free toolbox",
+    time: "20 minutes",
+    body: `
+      <p>There are dozens of AI building tools. You only need two to start, both free.</p>
+      <h4>Start here</h4>
+      <ul>
+        <li><strong><a href="https://claude.ai" target="_blank" rel="noopener">Claude</a></strong> is the easiest first step. Describe a tool and it builds a working, clickable version right in the chat, so you can try it immediately and ask follow-up changes. It's also great at explaining what the code does. The free plan has a daily usage limit, so spread your sessions out.</li>
+        <li><strong><a href="https://github.com" target="_blank" rel="noopener">GitHub</a></strong> is where your projects will live and where you'll publish them for free in lesson 4. Just make the account for now.</li>
+      </ul>
+      <h4>Good to know about</h4>
+      <ul>
+        <li><strong><a href="https://bolt.new" target="_blank" rel="noopener">Bolt</a></strong> builds full web apps in your browser and has one of the more generous free allowances among app builders. Try it when you want accounts, saved designs or multiple pages.</li>
+        <li><strong><a href="https://lovable.dev" target="_blank" rel="noopener">Lovable</a></strong> produces very polished apps for non-coders, but its free plan only covers a handful of messages per day. Save it for when you know exactly what you want.</li>
+        <li><strong><a href="https://v0.app" target="_blank" rel="noopener">v0</a></strong> by Vercel is strong at good-looking interfaces and has free monthly credits.</li>
+        <li><strong>Cursor</strong> or <strong>VS Code</strong> with an AI assistant are for later, when you want to work on files on your own computer.</li>
+      </ul>
+      <p>Free plans change often, so check each site's pricing page before you rely on one.</p>
+      <h4>Try this</h4>
+      <p>Create your Claude and GitHub accounts, then paste this into Claude:</p>
+      ${P(`I'm completely new to coding but I have an engineering and medical background. I want to learn to "vibecode" small interactive web tools, starting with one that helps people understand surfboard shapes. In plain language, explain: what HTML, CSS and JavaScript each do, what a "single-page web app" is, and what I should expect when you build something for me. Use analogies from engineering if helpful. Keep it under 300 words.`)}`
+  },
+  {
+    title: "Build v1: your surfboard outline viewer",
+    time: "45 minutes",
+    body: `
+      <p>Today you build your own version of the board at the top of this page. Copy the prompt below into Claude, then look at what it makes.</p>
+      ${P(`Build me a single-page interactive web tool called "Board Lab" that shows a surfboard from the top.
+
+Requirements:
+- A smooth, realistic surfboard outline drawn with SVG, centered on the page
+- Sliders for length (5'0" to 10'0"), width (18" to 23") and thickness (2" to 3.5"), showing values in feet and inches
+- Buttons to choose the nose shape (pointed, round) and tail shape (squash, round, pin, swallow)
+- The outline updates live as I change anything
+- A stringer line down the middle and three small fins near the tail
+- Clean, beachy design that works on a phone
+
+Keep everything in one HTML file.`)}
+      <h4>Then iterate</h4>
+      <p>Pick one of these, send it, check the result, and repeat. One change per message.</p>
+      <ul>
+        <li>"Add a short description under the board explaining what each tail shape does in the water."</li>
+        <li>"Let me pick the board color."</li>
+        <li>"Show the wide point and let me move it forward or back with a slider."</li>
+        <li>"The swallow tail looks too deep. Make the notch about half as deep."</li>
+      </ul>
+      <h4>You're done when</h4>
+      <p>You can drag a slider and the board changes in front of you, and at least one feature in it was your idea.</p>`
+  },
+  {
+    title: "Make it smart: volume, rocker and comparisons",
+    time: "1 hour",
+    body: `
+      <p>Now Board Lab starts teaching people something. You'll also learn the most important vibecoding skill: what to do when things break.</p>
+      ${P(`Let's add to Board Lab. Before writing code, give me a short plan of how you'll do it, then build it.
+
+1. A side view under the top view, showing rocker. Add sliders for nose rocker (2" to 7") and tail rocker (1" to 3").
+2. An estimated volume in litres, and explain in one sentence how it's estimated.
+3. A "What should I ride?" panel: I enter my weight and pick beginner, intermediate or advanced, and it suggests a volume range and tells me whether the current board is in range.
+4. A "Compare" button that saves the current board and overlays it as a faint outline, so I can see how a new shape differs.`)}
+      <h4>When something breaks</h4>
+      <p>It will, and that's normal. Treat it like a bug report:</p>
+      <ul>
+        <li>Say what you did, what you expected and what you saw. "I moved the tail rocker slider and the side view disappeared."</li>
+        <li>If there's an error message, paste it in exactly.</li>
+        <li>If it keeps going in circles, ask: "Go back to the last version that worked, then try a different approach."</li>
+        <li>Ask "Explain how the volume calculation works" any time you want to understand the code. You'll learn faster than you expect.</li>
+      </ul>
+      <h4>You're done when</h4>
+      <p>You can type your own weight and see whether your favorite board shape suits you.</p>`
+  },
+  {
+    title: "Put it online, free",
+    time: "30 minutes",
+    body: `
+      <p>A tool only counts once someone else can open it. Here are three free ways to publish, from easiest to most "real developer".</p>
+      <ul>
+        <li><strong>Share from Claude.</strong> Creations in Claude can be published as a link you can send. Fastest option.</li>
+        <li><strong>Netlify Drop.</strong> Go to <a href="https://app.netlify.com/drop" target="_blank" rel="noopener">app.netlify.com/drop</a>, drag in a folder containing your HTML file, and you get a live link. A free account keeps it online.</li>
+        <li><strong>GitHub Pages.</strong> Make a new repository, upload your file named <em>index.html</em>, then turn on Pages in the repository settings. You'll get a link like <em>yourname.github.io/board-lab</em>. This is the one worth learning, because it's how you'll keep and update projects long-term.</li>
+      </ul>
+      ${P(`I have a single HTML file for my web tool and a free GitHub account. Walk me through publishing it with GitHub Pages, one step at a time, assuming I've never used GitHub. Wait for me to say "done" before giving the next step.`)}
+      <h4>You're done when</h4>
+      <p>You've opened Board Lab on your phone from a real link, and sent that link to someone.</p>`
+  },
+  {
+    title: "Level up: 3D, templates and your graduation build",
+    time: "As long as you like",
+    body: `
+      <p>You can now build and ship tools. Here's where it gets fun. Pick any of these as your graduation project:</p>
+      <ul>
+        <li><strong>3D board viewer.</strong> Ask for a rotatable 3D model built with three.js, using your outline and rocker.</li>
+        <li><strong>Printable template.</strong> Export the outline at full size across multiple printable pages, so you could actually trace it onto a blank.</li>
+        <li><strong>Board library.</strong> Move to Bolt and build a version with accounts, where people save designs and share them with a link.</li>
+        <li><strong>Fin guide.</strong> An interactive explainer of thruster, quad and twin setups with diagrams.</li>
+      </ul>
+      ${P(`Add a 3D view to Board Lab using three.js. Build a smooth 3D surfboard from the current outline, thickness and rocker settings. Let me rotate it with my finger or mouse, and keep it in sync with the sliders. Keep it all in one HTML file and load three.js from a CDN.`)}
+      <h4>When you want more control</h4>
+      <p>Install VS Code or Cursor, open your project folder, and use an AI assistant inside the editor. Same skill, bigger projects. Claude can walk you through setup step by step.</p>
+      <h4>Graduation</h4>
+      <p>Send me the link to your finished Board Lab. I want to see what you shaped.</p>`
+  }
+];
+
+/* ---------- Schedule & unlocking ---------- */
+const params = new URLSearchParams(location.search);
+const previewAll = params.get("preview") === "all";
+const KEY = "boardlab-course-v1";
+
+function loadPlan() {
+  try { const raw = localStorage.getItem(KEY); return raw ? JSON.parse(raw) : null; }
+  catch (e) { return null; }
+}
+function savePlan(plan) {
+  try { localStorage.setItem(KEY, JSON.stringify(plan)); } catch (e) { /* storage unavailable: plan still works for this visit */ }
+}
+function parseDate(s) { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); }
+function addDays(d, n) { const x = new Date(d); x.setDate(x.getDate() + n); return x; }
+function today() { const t = new Date(); return new Date(t.getFullYear(), t.getMonth(), t.getDate()); }
+function nice(d) { return d.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" }); }
+function iso(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
+
+let plan = loadPlan();
+
+function unlockDate(i) {
+  if (i === 0 || !plan) return null;
+  return addDays(parseDate(plan.start), (i - 1) * plan.pace);
+}
+function isOpen(i) {
+  if (previewAll || i === 0) return true;
+  if (!plan) return false;
+  return today() >= unlockDate(i);
+}
+
+function renderLessons() {
+  const list = $("lessonList");
+  list.innerHTML = "";
+  LESSONS.forEach((l, i) => {
+    const li = document.createElement("li");
+    const open = isOpen(i);
+    li.className = "lesson" + (open ? "" : " locked");
+    let inner = `<div><h3>${l.title}</h3><p class="meta">${l.time}</p>`;
+    if (open) {
+      inner += `<details${i === 0 ? " open" : ""}><summary>${i === 0 ? "Hide lesson" : "Open lesson"}</summary><div class="lesson-body">${l.body}</div></details>`;
+    } else {
+      inner += plan
+        ? `<p class="locked-msg">Unlocks ${nice(unlockDate(i))}.</p>`
+        : `<p class="locked-msg">Pick your start date above to schedule this one.</p>`;
+    }
+    li.innerHTML = inner + "</div>";
+    list.appendChild(li);
+  });
+  list.querySelectorAll("details").forEach((d) => {
+    d.addEventListener("toggle", () => {
+      d.querySelector("summary").textContent = d.open ? "Hide lesson" : "Open lesson";
+    });
+  });
+}
+
+function shareMessage() {
+  const paceTxt = { 1: "every day", 2: "every 2 days", 3: "every 3 days", 7: "every week" }[plan.pace];
+  return `I'm starting my Board Lab course on ${nice(parseDate(plan.start))}, with a new lesson ${paceTxt}. Thank you for the best present 🏄`;
+}
+
+function renderStatus() {
+  const box = $("status");
+  if (!plan) { box.innerHTML = ""; return; }
+  const start = parseDate(plan.start);
+  const last = addDays(start, (LESSONS.length - 2) * plan.pace);
+  const msg = encodeURIComponent(shareMessage());
+  let sendHref = "";
+  if (CONFIG.phone) sendHref = `sms:${CONFIG.phone}?&body=${msg}`;
+  else if (CONFIG.email) sendHref = `mailto:${CONFIG.email}?subject=${encodeURIComponent("My Board Lab start date")}&body=${msg}`;
+
+  box.innerHTML = `
+    <p>You're booked. Lesson 1 opens <strong>${nice(start)}</strong> and you'll finish on ${nice(last)}. Come back to this page any time; it remembers your plan on this device.</p>
+    <div class="actions">
+      ${sendHref
+        ? `<a class="btn" href="${sendHref}">Send my date to ${CONFIG.fromName}</a>`
+        : `<button class="btn" type="button" id="shareBtn">Send my date to ${CONFIG.fromName}</button>`}
+      <button class="btn ghost" type="button" id="changeBtn">Change date</button>
+    </div>`;
+
+  const shareBtn = $("shareBtn");
+  if (shareBtn) shareBtn.addEventListener("click", async () => {
+    const text = shareMessage();
+    try {
+      if (navigator.share) { await navigator.share({ text }); return; }
+      await navigator.clipboard.writeText(text);
+      shareBtn.textContent = "Copied, now paste it in a text";
+    } catch (e) { /* user cancelled */ }
+  });
+  $("changeBtn").addEventListener("click", () => { $("startDate").focus(); });
+}
+
+/* Defaults for the picker */
+const sd = $("startDate");
+sd.min = iso(today());
+sd.value = plan ? plan.start : iso(addDays(today(), 1));
+if (plan) $("pace").value = String(plan.pace);
+
+$("saveBtn").addEventListener("click", () => {
+  if (!sd.value) { sd.focus(); return; }
+  plan = { start: sd.value, pace: +$("pace").value };
+  savePlan(plan);
+  renderStatus();
+  renderLessons();
+  $("status").scrollIntoView({ behavior: "smooth", block: "nearest" });
+});
+
+/* Copy buttons (delegated) */
+document.addEventListener("click", async (e) => {
+  const b = e.target.closest(".copy"); if (!b) return;
+  const text = b.parentElement.querySelector("pre").textContent;
+  try { await navigator.clipboard.writeText(text); }
+  catch (err) {
+    const ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta);
+    ta.select(); try { document.execCommand("copy"); } catch (_) {} ta.remove();
+  }
+  b.textContent = "Copied";
+  setTimeout(() => (b.textContent = "Copy prompt"), 1600);
+});
+
+renderStatus();
+renderLessons();
+</script>
+</body>
+</html>
