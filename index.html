@@ -308,7 +308,7 @@
   <section id="start" aria-labelledby="start-title">
     <div class="wrap">
       <h2 id="start-title">Pick your start date</h2>
-      <p class="lede prose">This is a five-lesson course in building your own interactive tools with AI, no coding background needed. Choose when you want it to begin and how often a new lesson should unlock. Lesson 0 is open right now.</p>
+      <p class="lede prose">This is a nine-lesson course: first you learn with AI (tools, setup, resources, how to ask well), then you build your own tools with it, no coding background needed. Choose when you want it to begin and how often a new lesson should unlock. Each lesson is checked by Paulina before it opens. Lesson 0 is open right now.</p>
 
       <div class="picker">
         <div class="field">
@@ -356,7 +356,8 @@ const CONFIG = {
   phone: "+16283587058",                   // your number, e.g. "+14155550123" (lets her text you her start date)
   email: "paulina.cajiao21@gmail.com"                    // or your email, used if phone is empty
 };
-/* Tip: add ?preview=all to the URL to unlock every lesson for proofreading. */
+/* Tip: add ?preview=all to the URL to unlock every lesson (even unapproved ones) for proofreading.
+   To approve a lesson for Nat, delete the line `approved: false,` from that lesson below. */
 /* ===================================================================== */
 
 const $ = (id) => document.getElementById(id);
@@ -530,7 +531,7 @@ const LESSONS = [
       <h4>Start here</h4>
       <ul>
         <li><strong><a href="https://claude.ai" target="_blank" rel="noopener">Claude</a></strong> is the easiest first step. Describe a tool and it builds a working, clickable version right in the chat, so you can try it immediately and ask follow-up changes. It's also great at explaining what the code does. The free plan has a daily usage limit, so spread your sessions out.</li>
-        <li><strong><a href="https://github.com" target="_blank" rel="noopener">GitHub</a></strong> is where your projects will live and where you'll publish them for free in lesson 4. Just make the account for now.</li>
+        <li><strong><a href="https://github.com" target="_blank" rel="noopener">GitHub</a></strong> is where your projects will live and where you'll publish them for free in the publishing lesson. Just make the account for now.</li>
       </ul>
       <h4>Good to know about</h4>
       <ul>
@@ -543,6 +544,92 @@ const LESSONS = [
       <h4>Try this</h4>
       <p>Create your Claude and GitHub accounts, then paste this into Claude:</p>
       ${P(`I'm completely new to coding but I have an engineering and medical background. I want to learn to "vibecode" small interactive web tools, starting with one that helps people understand surfboard shapes. In plain language, explain: what HTML, CSS and JavaScript each do, what a "single-page web app" is, and what I should expect when you build something for me. Use analogies from engineering if helpful. Keep it under 300 words.`)}`
+  },
+  {
+    title: "Learn with AI: the tools worth knowing",
+    time: "20 minutes",
+    approved: false,
+    body: `
+      <p>Before you build anything, it helps to know the landscape. AI tools fall into three families, and you only need one from each to get going.</p>
+      <h4>1. Chat assistants (to learn and think with)</h4>
+      <ul>
+        <li><strong><a href="https://claude.ai" target="_blank" rel="noopener">Claude</a></strong>: strong at explaining things step by step and at building small tools you can click right in the chat.</li>
+        <li><strong><a href="https://chatgpt.com" target="_blank" rel="noopener">ChatGPT</a></strong> and <strong><a href="https://gemini.google.com" target="_blank" rel="noopener">Gemini</a></strong>: good to compare answers. Asking two assistants the same question is a quick way to spot mistakes.</li>
+      </ul>
+      <h4>2. Research helpers (to find and read sources)</h4>
+      <ul>
+        <li><strong><a href="https://notebooklm.google.com" target="_blank" rel="noopener">NotebookLM</a></strong>: upload papers or notes and ask questions about only those documents. Handy for studying.</li>
+        <li><strong><a href="https://www.perplexity.ai" target="_blank" rel="noopener">Perplexity</a></strong>: answers with sources attached, so you can check them.</li>
+      </ul>
+      <h4>3. Builders (to turn an idea into a working page)</h4>
+      <ul>
+        <li>Claude's built-in builder (in the chat) is enough for everything in this course.</li>
+        <li>Other builders exist, for example <a href="https://replit.com" target="_blank" rel="noopener">Replit</a> and <a href="https://v0.app" target="_blank" rel="noopener">v0</a>. Peek at them later, once you know what you want.</li>
+      </ul>
+      <h4>One rule for every tool</h4>
+      <p>AI can sound sure and still be wrong. For anything that matters, ask for sources and check one of them yourself. Your scientific habits are an advantage here.</p>
+      <p class="meta">Free plans and limits change often, so check each tool's pricing page when you sign up.</p>`
+  },
+  {
+    title: "Learn with AI: what to download and set up",
+    time: "25 minutes",
+    approved: false,
+    body: `
+      <p>A short, no-jargon setup list. Everything here is free to start, and none of it needs coding.</p>
+      <ul>
+        <li><strong>Make a Claude account</strong> at <a href="https://claude.ai" target="_blank" rel="noopener">claude.ai</a>, and optionally install the phone app so you can ask questions anywhere.</li>
+        <li><strong>Make a GitHub account</strong> at <a href="https://github.com" target="_blank" rel="noopener">github.com</a>. This is where your projects will be published later. Pick a username you won't mind sharing.</li>
+        <li><strong>Use a modern browser</strong> such as Chrome, Safari or Firefox, kept up to date.</li>
+        <li><strong>Keep a notes app open</strong> (Notes, Notion, anything). Paste in the prompts that worked, so you build your own recipe book.</li>
+      </ul>
+      <h4>What you do not need yet</h4>
+      <p>You don't need to install code editors, terminals or programming languages. If an AI ever tells you to, pause and ask: "Is there a way to do this without installing anything?" Usually there is.</p>
+      <h4>A safety habit</h4>
+      <p>Never paste passwords, patient data or anything confidential into an AI tool. Use made-up examples instead.</p>`
+  },
+  {
+    title: "Learn with AI: resources to keep learning",
+    time: "20 minutes, then explore at your pace",
+    approved: false,
+    body: `
+      <p>Pick one or two of these, not all of them. Curiosity does the rest.</p>
+      <h4>Watch</h4>
+      <ul>
+        <li><a href="https://www.youtube.com/@AndrejKarpathy" target="_blank" rel="noopener">Andrej Karpathy on YouTube</a>: friendly, clear explanations of how large language models work.</li>
+        <li><a href="https://www.youtube.com/@3blue1brown" target="_blank" rel="noopener">3Blue1Brown</a>: beautiful visual explanations of the maths behind neural networks.</li>
+      </ul>
+      <h4>Read and practise</h4>
+      <ul>
+        <li><a href="https://docs.claude.com" target="_blank" rel="noopener">Anthropic's prompting guides</a>: practical tips for asking better questions.</li>
+        <li><a href="https://www.deeplearning.ai/short-courses/" target="_blank" rel="noopener">DeepLearning.AI short courses</a>: free, bite-sized lessons on working with AI.</li>
+      </ul>
+      <h4>Ask a human too</h4>
+      <p>Communities such as r/ClaudeAI and r/ChatGPT show how other beginners solve problems. Treat tips as ideas to test, not facts.</p>
+      <h4>A simple routine</h4>
+      <p>Spend 15 minutes a day: ask your assistant to explain one concept, then explain it back in your own words and ask it to correct you.</p>`
+  },
+  {
+    title: "Learn with AI: how to ask well",
+    time: "30 minutes",
+    approved: false,
+    body: `
+      <p>The quality of your answer depends on the quality of your question. A good prompt has four parts.</p>
+      <ul>
+        <li><strong>Role:</strong> who the AI should be. "Act as a patient tutor."</li>
+        <li><strong>Context:</strong> what it should know about you. "I have an engineering and medical background and I'm new to coding."</li>
+        <li><strong>Task:</strong> what you want. "Explain what a web page is made of."</li>
+        <li><strong>Format:</strong> how you want the answer. "Five bullet points and one analogy."</li>
+      </ul>
+      <h4>Try this</h4>
+      ${P(`Act as a patient tutor. I have an engineering and medical background but I'm new to coding. Explain what HTML, CSS and JavaScript each do, using the human body as an analogy. Then quiz me with three questions, one at a time.`)}
+      <h4>Words you'll meet</h4>
+      <ul>
+        <li><strong>Prompt:</strong> the message you send to the AI.</li>
+        <li><strong>Hallucination:</strong> a confident answer that is made up.</li>
+        <li><strong>Context window:</strong> how much conversation the AI can keep in mind at once. In a long chat, start a fresh one and summarise.</li>
+      </ul>
+      <h4>Before the build lessons</h4>
+      <p>When these four feel comfortable, the build lessons are waiting. That's where Paulina will jump in with you.</p>`
   },
   {
     title: "Build v1: your surfboard outline viewer",
@@ -653,7 +740,15 @@ function unlockDate(i) {
 function isOpen(i) {
   if (previewAll || i === 0) return true;
   if (!plan) return false;
-  return today() >= unlockDate(i);
+  return today() >= unlockDate(i) && isApproved(i);
+}
+function isApproved(i) { return LESSONS[i].approved !== false; }
+function waitingOnApproval(i) { return plan && i > 0 && today() >= unlockDate(i) && !isApproved(i); }
+function nudgeHref(i) {
+  const msg = encodeURIComponent(`Hi ${CONFIG.fromName}! "${LESSONS[i].title}" is due to open for me today. Can you unlock it? 🏄`);
+  if (CONFIG.phone) return `sms:${CONFIG.phone}?&body=${msg}`;
+  if (CONFIG.email) return `mailto:${CONFIG.email}?subject=${encodeURIComponent("Please unlock my next lesson")}&body=${msg}`;
+  return "";
 }
 
 function renderLessons() {
@@ -667,7 +762,10 @@ function renderLessons() {
     if (open) {
       inner += `<details${i === 0 ? " open" : ""}><summary>${i === 0 ? "Hide lesson" : "Open lesson"}</summary><div class="lesson-body">${l.body}</div></details>`;
     } else {
-      inner += plan
+      const nudge = waitingOnApproval(i) ? nudgeHref(i) : "";
+      inner += waitingOnApproval(i)
+        ? `<p class="locked-msg">It's your day! ${CONFIG.fromName} is giving this one a final check before it opens.</p>${nudge ? `<a class="btn ghost" href="${nudge}">Nudge ${CONFIG.fromName} to unlock</a>` : ""}`
+        : plan
         ? `<p class="locked-msg">Unlocks ${nice(unlockDate(i))}.</p>`
         : `<p class="locked-msg">Pick your start date above to schedule this one.</p>`;
     }
@@ -683,7 +781,7 @@ function renderLessons() {
 
 function shareMessage() {
   const paceTxt = { 1: "every day", 2: "every 2 days", 3: "every 3 days", 7: "every week" }[plan.pace];
-  return `I'm starting my Board Lab course on ${nice(parseDate(plan.start))}, with a new lesson ${paceTxt}. Thank you for the best present 🏄`;
+  return `I'm starting my Board Lab course on ${nice(parseDate(plan.start))}, with a new lesson ${paceTxt}. Please check my lessons so they're ready on time. Thank you for the best present 🏄`;
 }
 
 function renderStatus() {
